@@ -1,6 +1,8 @@
 
 import tcod
 
+from Inputs.actions import EscapeAction, MovementAction
+from Inputs.input_handlers import EventHandler
 
 def main() -> None:
     # Screen Hight and Width
@@ -15,13 +17,14 @@ def main() -> None:
     tileset = tcod.tileset.load_tilesheet(
         "assets/tilesets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
-
+    
+    event_handler = EventHandler()
     # This Builds the Screen, takes the Width and Hight and a Title and also a Tileset, wich is what we difined before
     with tcod.context.new_terminal(
         screen_width,
         screen_height,
         tileset=tileset,
-        title="Yet Another Roguelike Tutorial",
+        title="Gaming",
         vsync=True,
     ) as context:
 
@@ -35,9 +38,21 @@ def main() -> None:
             # "context.present" is what actually updates the screen with what we’ve told it to display so far.
             context.present(root_console)
 
-            # This allows for an Exit (Pressing the X button to close the Program)
+            # Clears the console
+            root_console.clear()
+
+            # This Entire Thing is for adding the stuff from Input_handlers.py/Actions.py or somth
             for event in tcod.event.wait():
-                if event.type == "QUIT":
+                action = event_handler.dispatch(event)
+
+                if action is None:
+                    continue
+
+                if isinstance(action, MovementAction):
+                    player_x += action.dx
+                    player_y += action.dy
+
+                elif isinstance(action, EscapeAction):
                     raise SystemExit()
 
 
