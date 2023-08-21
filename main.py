@@ -6,6 +6,7 @@ from procgen import generate_dungeon
 import copy
 import entity_factories
 
+
 def main() -> None:
     # Screen Hight and Width
     screen_width = 80
@@ -24,22 +25,20 @@ def main() -> None:
         "assets/tilesets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
 
-    event_handler = EventHandler()
-
     player = copy.deepcopy(entity_factories.player)
 
+    engine = Engine(player=player)
 
-    game_map = generate_dungeon(
+    engine.game_map = generate_dungeon(
         max_rooms=max_rooms,
         room_min_size=room_min_size,
         room_max_size=room_max_size,
         map_width=map_width,
         map_height=map_height,
         max_monsters_per_room=max_monsters_per_room,
-        player=player
+        engine=engine,
     )
-
-    engine = Engine(event_handler=event_handler, game_map=game_map, player=player)
+    engine.update_fov()
 
     # This Builds the Screen, takes the Width and Hight and a Title and also a Tileset, wich is what we difined before
     with tcod.context.new_terminal(
@@ -55,14 +54,11 @@ def main() -> None:
             # This Prints the String in its X and Y Position of the Player on the "Console"
             engine.render(console=root_console, context=context)
 
-            # "context.present" is what actually updates the screen with what we’ve told it to display so far.
-            events = tcod.event.wait()
+            engine.event_handler.handle_events()
 
             # Clears the console
             root_console.clear()
 
-            # This Entire Thing is for adding the stuff from Input_handlers.py/Actions.py or somth
-            engine.handle_events(events)
 
 
 if __name__ == "__main__":
