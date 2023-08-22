@@ -5,6 +5,7 @@ from Inputs.input_handlers import EventHandler
 from procgen import generate_dungeon
 import copy
 import entity_factories
+import color
 
 
 def main() -> None:
@@ -12,7 +13,7 @@ def main() -> None:
     screen_width = 80
     screen_height = 50
     map_width = 80
-    map_height = 45
+    map_height = 43
 
     room_max_size = 10
     room_min_size = 6
@@ -40,6 +41,10 @@ def main() -> None:
     )
     engine.update_fov()
 
+    engine.message_log.add_message(
+        "Real", color.welcome_text
+    )
+
     # This Builds the Screen, takes the Width and Hight and a Title and also a Tileset, wich is what we difined before
     with tcod.context.new_terminal(
             screen_width,
@@ -51,14 +56,14 @@ def main() -> None:
         # This Creates Our "Console" which is what we’ll be drawing to
         root_console = tcod.console.Console(screen_width, screen_height, order="F")
         while True:
-            # This Prints the String in its X and Y Position of the Player on the "Console"
-            engine.render(console=root_console, context=context)
+            root_console.clear()
+            engine.event_handler.on_render(console=root_console)
+            context.present(root_console)
 
-            engine.event_handler.handle_events()
+            engine.event_handler.handle_events(context)
 
             # Clears the console
             root_console.clear()
-
 
 
 if __name__ == "__main__":
