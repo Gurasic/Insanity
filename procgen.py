@@ -6,9 +6,9 @@ import entity_factories
 from game_map import GameMap
 import tile_types
 
-
 if TYPE_CHECKING:
     from engine import Engine
+
 
 class RectangularRoom:
     def __init__(self, x: int, y: int, width: int, height: int):
@@ -37,8 +37,10 @@ class RectangularRoom:
                 and self.y1 <= other.y2
                 and self.y2 >= other.y1
         )
+
+
 def place_entities(
-    room: RectangularRoom, dungeon: GameMap, maximum_monsters: int, maximum_items: int
+        room: RectangularRoom, dungeon: GameMap, maximum_monsters: int, maximum_items: int
 ) -> None:
     number_of_monsters = random.randint(0, maximum_monsters)
     number_of_items = random.randint(0, maximum_items)
@@ -58,37 +60,47 @@ def place_entities(
         y = random.randint(room.y1 + 1, room.y2 - 1)
 
         if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
-            entity_factories.health_potion.spawn(dungeon, x, y)
+            item_chance = random.random()
+
+            if item_chance < 0.7:
+                entity_factories.health_potion.spawn(dungeon, x, y)
+            elif item_chance < 0.9:
+                entity_factories.confusion_scroll.spawn(dungeon, x, y)
+            elif item_chance < 0.8:
+                entity_factories.fireball_scroll.spawn(dungeon, x, y)
+            else:
+                entity_factories.lightning_scroll.spawn(dungeon, x, y)
 
 
 def tunnel_between(
-            start: Tuple[int, int], end: Tuple[int, int]
-    ) -> Iterator[Tuple[int, int]]:
-        """Return an L-shaped tunnel between these two points."""
-        x1, y1 = start
-        x2, y2 = end
-        if random.random() < 0.5:  # 50% chance.
-            # Move horizontally, then vertically.
-            corner_x, corner_y = x2, y1
-        else:
-            # Move vertically, then horizontally.
-            corner_x, corner_y = x1, y2
+        start: Tuple[int, int], end: Tuple[int, int]
+) -> Iterator[Tuple[int, int]]:
+    """Return an L-shaped tunnel between these two points."""
+    x1, y1 = start
+    x2, y2 = end
+    if random.random() < 0.5:  # 50% chance.
+        # Move horizontally, then vertically.
+        corner_x, corner_y = x2, y1
+    else:
+        # Move vertically, then horizontally.
+        corner_x, corner_y = x1, y2
 
-        # Generate the coordinates for this tunnel.
-        for x, y in tcod.los.bresenham((x1, y1), (corner_x, corner_y)).tolist():
-            yield x, y
-        for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
-            yield x, y
+    # Generate the coordinates for this tunnel.
+    for x, y in tcod.los.bresenham((x1, y1), (corner_x, corner_y)).tolist():
+        yield x, y
+    for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
+        yield x, y
+
 
 def generate_dungeon(
-    max_rooms: int,
-    room_min_size: int,
-    room_max_size: int,
-    map_width: int,
-    map_height: int,
-    max_monsters_per_room: int,
-    max_items_per_room: int,
-    engine: Engine,
+        max_rooms: int,
+        room_min_size: int,
+        room_max_size: int,
+        map_width: int,
+        map_height: int,
+        max_monsters_per_room: int,
+        max_items_per_room: int,
+        engine: Engine,
 ) -> GameMap:
     """Generate a new dungeon map."""
     player = engine.player
