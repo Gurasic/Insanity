@@ -50,7 +50,7 @@ def place_entities(
             if random.random() < 0.8:
                 entity_factories.orc.spawn(dungeon, x, y)
             else:
-                entity_factories.Dumb.spawn(dungeon, x, y)
+                entity_factories.troll.spawn(dungeon, x, y)
 
 
 def tunnel_between(
