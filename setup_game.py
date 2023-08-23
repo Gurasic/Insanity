@@ -12,8 +12,7 @@ import color
 from Inputs import input_handlers
 from engine import Engine
 import entity_factories
-from procgen import generate_dungeon
-
+from game_map import GameWorld
 
 # Load the background image and remove the alpha channel.
 background_image = tcod.image.load("assets/menu_background.png")[:, :, :3]
@@ -35,7 +34,8 @@ def new_game() -> Engine:
 
     engine = Engine(player=player)
 
-    engine.game_map = generate_dungeon(
+    engine.game_world = GameWorld(
+        engine=engine,
         max_rooms=max_rooms,
         room_min_size=room_min_size,
         room_max_size=room_max_size,
@@ -43,14 +43,16 @@ def new_game() -> Engine:
         map_height=map_height,
         max_monsters_per_room=max_monsters_per_room,
         max_items_per_room=max_items_per_room,
-        engine=engine,
     )
+
+    engine.game_world.generate_floor()
     engine.update_fov()
 
     engine.message_log.add_message(
         "Hello and welcome, adventurer, to yet another dungeon!", color.welcome_text
     )
     return engine
+
 
 def load_game(filename: str) -> Engine:
     """Load an Engine instance from a file."""
@@ -85,7 +87,7 @@ class MainMenu(input_handlers.BaseEventHandler):
 
         menu_width = 24
         for i, text in enumerate(
-            ["[N] Play a new game", "[C] Continue last game", "[Q] Quit"]
+                ["[N] Play a new game", "[C] Continue last game", "[Q] Quit"]
         ):
             console.print(
                 console.width // 2,
@@ -98,7 +100,7 @@ class MainMenu(input_handlers.BaseEventHandler):
             )
 
     def ev_keydown(
-        self, event: tcod.event.KeyDown
+            self, event: tcod.event.KeyDown
     ) -> Optional[input_handlers.BaseEventHandler]:
         if event.sym in (tcod.event.K_q, tcod.event.K_ESCAPE):
             raise SystemExit()
@@ -114,5 +116,3 @@ class MainMenu(input_handlers.BaseEventHandler):
             return input_handlers.MainGameEventHandler(new_game())
 
         return None
-
-
