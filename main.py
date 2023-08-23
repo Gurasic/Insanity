@@ -22,7 +22,7 @@ def main() -> None:
 
     # Loads the Tileset file "dejavu10x10_gs_tc"
     tileset = tcod.tileset.load_tilesheet(
-        "assets/tilesets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
+        "assets/Tilesets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
 
     handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
